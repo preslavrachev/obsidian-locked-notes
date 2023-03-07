@@ -1,4 +1,6 @@
-# Obsidian Sample Plugin
+# Obsidian Locked Pages Plugin
+
+This plugin is intended to make Obsidian notes read-first and prevent accidental edits to them.
 
 This is a sample plugin for Obsidian (https://obsidian.md).
 
