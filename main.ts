@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
+import { MarkdownView, Plugin, WorkspaceLeaf } from 'obsidian';
 
 const VIEW_STATE_SOURCE = "source";
 const VIEW_STATE_PREVIEW = "preview";
@@ -6,14 +6,85 @@ const VIEW_STATE_PREVIEW = "preview";
 export default class LockedNotesPlugin extends Plugin {
 	private lockedNotes: Set<string> = new Set();
 
+	private handleDoubleClick(leaf: WorkspaceLeaf) {
+		return () => {
+			let viewState = leaf.getViewState();
+			if (!viewState.state) {
+				return;
+			}
+
+			// Unlock the note when double-clicked
+			const view = leaf.view as MarkdownView;
+			if (view.file) {
+				this.lockedNotes.delete(view.file.path);
+			}
+
+			viewState.state.mode = VIEW_STATE_SOURCE;
+			leaf.setViewState(viewState);
+
+			// Update button after mode change
+			setTimeout(() => this.refreshLockButton(view), 100);
+		};
+	}
+
+	private handleEscapeKey(leaf: WorkspaceLeaf) {
+		return (e: KeyboardEvent) => {
+			if (e.key === 'Escape') {
+				let viewState = leaf.getViewState();
+				if (!viewState.state) {
+					return;
+				}
+
+				// Lock the note when escape is pressed
+				const view = leaf.view as MarkdownView;
+				if (view.file) {
+					this.lockedNotes.add(view.file.path);
+				}
+
+				viewState.state.mode = VIEW_STATE_PREVIEW;
+				leaf.setViewState(viewState);
+
+				// Update button after mode change
+				setTimeout(() => this.refreshLockButton(view), 100);
+			}
+		};
+	}
+
 	private addLockButton(view: MarkdownView) {
+		// Remove any existing lock button first
+		this.removeLockButton(view);
+
 		const isLocked = this.isNoteLocked(view);
 		const icon = isLocked ? 'lock' : 'unlock';
 		const title = isLocked ? 'Unlock note (enable editing)' : 'Lock note (prevent editing)';
 
-		view.addAction(icon, title, () => {
+		const button = view.addAction(icon, title, () => {
 			this.toggleNoteLock(view);
 		});
+
+		// Mark this as our lock button
+		button.addClass('locked-notes-button');
+
+		// Add color styling based on lock state
+		this.applyButtonStyling(button, isLocked);
+
+		// Try to hide the original reading/editing mode switcher
+		setTimeout(() => this.hideOriginalModeSwitcher(view), 50);
+	}
+
+	private applyButtonStyling(button: HTMLElement, isLocked: boolean) {
+		// Remove existing color classes
+		button.removeClass('locked-notes-locked', 'locked-notes-unlocked');
+
+		if (isLocked) {
+			// Locked state - red color
+			button.addClass('locked-notes-locked');
+			button.style.color = '#e74c3c'; // Red color
+		} else {
+			// Unlocked state - green color
+			button.addClass('locked-notes-unlocked');
+			button.style.color = '#27ae60'; // Green color
+		}
 	}
 
 	private toggleNoteLock(view: MarkdownView) {
@@ -61,27 +132,92 @@ export default class LockedNotesPlugin extends Plugin {
 		leaf.setViewState(viewState);
 	}
 
-	private refreshLockButton(view: MarkdownView) {
-		// Remove existing lock button
-		const existingButton = view.containerEl.querySelector('.view-action[aria-label*="lock"], .view-action[aria-label*="Lock"], .view-action[aria-label*="Unlock"]');
+	private hideOriginalModeSwitcher(view: MarkdownView) {
+		// Only hide if our lock button exists
+		const ourButton = view.containerEl.querySelector('.locked-notes-button');
+		if (!ourButton) {
+			return; // Don't hide if our button isn't there
+		}
+
+		// Hide the original reading/editing mode switcher button
+		// Try multiple selectors to catch different possible labels
+		const selectors = [
+			'.view-action[aria-label*="reading"]',
+			'.view-action[aria-label*="editing"]',
+			'.view-action[aria-label*="Reading"]',
+			'.view-action[aria-label*="Editing"]',
+			'.view-action[aria-label*="edit"]',
+			'.view-action[aria-label*="Edit"]',
+			'.view-action[aria-label*="preview"]',
+			'.view-action[aria-label*="Preview"]',
+			'.view-action svg.lucide-book',
+			'.view-action svg.lucide-pencil',
+			'.view-action svg.lucide-edit'
+		];
+
+		for (const selector of selectors) {
+			const modeSwitcher = view.containerEl.querySelector(selector);
+			if (modeSwitcher && !modeSwitcher.classList.contains('locked-notes-button')) {
+				(modeSwitcher.closest('.view-action') as HTMLElement)?.style.setProperty('display', 'none', 'important');
+			}
+		}
+	}
+
+	private showOriginalModeSwitcher(view: MarkdownView) {
+		// Show the original reading/editing mode switcher button
+		const selectors = [
+			'.view-action[aria-label*="reading"]',
+			'.view-action[aria-label*="editing"]',
+			'.view-action[aria-label*="Reading"]',
+			'.view-action[aria-label*="Editing"]',
+			'.view-action[aria-label*="edit"]',
+			'.view-action[aria-label*="Edit"]',
+			'.view-action[aria-label*="preview"]',
+			'.view-action[aria-label*="Preview"]',
+			'.view-action svg.lucide-book',
+			'.view-action svg.lucide-pencil',
+			'.view-action svg.lucide-edit'
+		];
+
+		for (const selector of selectors) {
+			const modeSwitcher = view.containerEl.querySelector(selector);
+			if (modeSwitcher) {
+				(modeSwitcher.closest('.view-action') as HTMLElement)?.style.removeProperty('display');
+			}
+		}
+	}
+
+	private removeLockButton(view: MarkdownView) {
+		const existingButton = view.containerEl.querySelector('.locked-notes-button');
 		if (existingButton) {
 			existingButton.remove();
 		}
+	}
 
-		// Add new button with updated state
-		this.addLockButton(view);
+	private refreshLockButton(view: MarkdownView) {
+		// Use a longer delay to ensure Obsidian has finished its own updates
+		setTimeout(() => {
+			this.addLockButton(view);
+		}, 300);
 	}
 
 	private setupNoteView(leaf: WorkspaceLeaf) {
 		if (this.isActiveNote(leaf)) {
 			const view = leaf.view as MarkdownView;
-			this.addLockButton(view);
+
+			// Add event handlers
+			leaf.view.containerEl.ondblclick = this.handleDoubleClick(leaf);
+			leaf.view.containerEl.onkeydown = this.handleEscapeKey(leaf);
 
 			// Auto-lock new notes
 			if (view.file && !this.lockedNotes.has(view.file.path)) {
 				this.lockNote(view);
-				this.refreshLockButton(view);
 			}
+
+			// Add lock button with enough delay for the view to be fully ready
+			setTimeout(() => {
+				this.addLockButton(view);
+			}, 500);
 		}
 	}
 
@@ -102,13 +238,20 @@ export default class LockedNotesPlugin extends Plugin {
 	}
 
 	onunload() {
-		// Clean up lock buttons
+		// Clean up event handlers and buttons
 		this.app.workspace.iterateAllLeaves(leaf => {
 			if (this.isActiveNote(leaf)) {
-				const existingButton = leaf.view.containerEl.querySelector('.view-action[aria-label*="lock"], .view-action[aria-label*="Lock"], .view-action[aria-label*="Unlock"]');
-				if (existingButton) {
-					existingButton.remove();
-				}
+				const view = leaf.view as MarkdownView;
+
+				// Remove event handlers
+				leaf.view.containerEl.ondblclick = null;
+				leaf.view.containerEl.onkeydown = null;
+
+				// Remove lock button
+				this.removeLockButton(view);
+
+				// Restore original mode switcher
+				this.showOriginalModeSwitcher(view);
 			}
 		});
 
