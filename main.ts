@@ -1,48 +1,54 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 
+const VIEW_STATE_SOURCE = "source";
+
+const VIEW_STATE_PREVIEW = "preview";
 export default class LockedNotesPlugin extends Plugin {
-	async onload() {
-		this.app.workspace.iterateAllLeaves(leaf => {
-			if (this.isActiveNote(leaf)) {
-				leaf.view.containerEl.ondblclick = (e: any) => {
-					let viewState = leaf.getViewState();
-					viewState.state.mode = "source";
-					leaf.setViewState(viewState);
-				};
-				leaf.view.containerEl.onkeydown = (e) => {
-					if (e.keyCode == 27) {
-						let viewState = leaf.getViewState();
-						viewState.state.mode = "preview";
-						leaf.setViewState(viewState);
-					}
-				};
-				this.lockLeaf(leaf);
+	private handleDoubleClick(leaf: WorkspaceLeaf) {
+		return () => {
+			let viewState = leaf.getViewState();
+			if (!viewState.state) {
+				return;
 			}
-		});
-		this.registerEvent(
-			this.app.workspace.on(
-				"active-leaf-change", leaf => {
-					let l = leaf as WorkspaceLeaf
-					if (this.isActiveNote(l)) {
-						l.view.containerEl.ondblclick = (e: any) => {
-							//console.log("dblclick");
-							let viewState = l.getViewState();
-							viewState.state.mode = "source";
-							l.setViewState(viewState);
-						};
 
-						l.view.containerEl.onkeydown = (e) => {
-							if (e.keyCode == 27) {
-								let viewState = l.getViewState();
-								viewState.state.mode = "preview";
-								l.setViewState(viewState);
-							}
-						};
+			viewState.state.mode = VIEW_STATE_SOURCE;
+			leaf.setViewState(viewState);
+		};
+	}
 
-						this.lockLeaf(l);
-					}
+	private handleEscapeKey(leaf: WorkspaceLeaf) {
+		return (e: KeyboardEvent) => {
+			if (e.keyCode === 27) {
+				let viewState = leaf.getViewState();
+				if (!viewState.state) {
+					return;
 				}
-			)
+
+				viewState.state.mode = VIEW_STATE_PREVIEW;
+				leaf.setViewState(viewState);
+			}
+		};
+	}
+
+	private attachEventHandlers(leaf: WorkspaceLeaf) {
+		if (this.isActiveNote(leaf)) {
+			leaf.view.containerEl.ondblclick = this.handleDoubleClick(leaf);
+			leaf.view.containerEl.onkeydown = this.handleEscapeKey(leaf);
+			this.lockLeaf(leaf);
+		}
+	}
+
+	async onload() {
+		// Initialize for all open notes
+		this.app.workspace.iterateAllLeaves(leaf => {
+			this.attachEventHandlers(leaf);
+		});
+
+		// Register handler for new notes
+		this.registerEvent(
+			this.app.workspace.on("active-leaf-change", leaf => {
+				this.attachEventHandlers(leaf as WorkspaceLeaf);
+			})
 		);
 	}
 
@@ -57,16 +63,17 @@ export default class LockedNotesPlugin extends Plugin {
 
 	isActiveNote(leaf: WorkspaceLeaf): Boolean {
 		let view = leaf.view instanceof MarkdownView ? leaf.view : null;
-		if (view === null) {
-			return false;
-		}
-
-		return true;
+		return view !== null;
 	}
 
 	lockLeaf(leaf: WorkspaceLeaf) {
 		let viewState = leaf.getViewState();
-		viewState.state.mode = "preview";
+		if (!viewState.state) {
+			return;
+		}
+
+		viewState.state.mode = VIEW_STATE_PREVIEW;
 		leaf.setViewState(viewState);
 	}
 }
+
