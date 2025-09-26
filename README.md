@@ -11,6 +11,10 @@ When using Obsidian's default settings, it's easy to accidentally modify notes w
 - Notes you want to keep pristine
 - Shared knowledge bases where accidental changes affect timestamps
 
+## Demo
+
+![](https://preslav.me/img/obsidian-locked-notes.gif)
+
 ## ✨ Key Features
 
 - **🔒 Auto-Lock**: Notes automatically open in preview mode
