@@ -1,11 +1,11 @@
 {
 	"id": "obsidian-locked-notes",
 	"name": "Locked Notes",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
+	"description": "Automatically locks notes in preview mode to prevent accidental edits. Double-click to unlock for editing, press Escape to lock again.",
 	"author": "Preslav Rachev",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"authorUrl": "https://preslav.me",
+	"fundingUrl": "https://p5v.gumroad.com/coffee",
 	"isDesktopOnly": false
 }

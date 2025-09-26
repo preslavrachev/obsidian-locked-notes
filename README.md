@@ -1,98 +1,83 @@
-# Obsidian Locked Pages Plugin
+# Locked Notes Plugin for Obsidian
 
-This plugin is intended to make Obsidian notes read-first and prevent accidental edits to them.
+**Prevent accidental edits with intentional note interactions**
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+Ever accidentally modified an important document while scrolling through it? Tired of inadvertent changes messing up your pristine reference materials? The Locked Notes plugin brings a gentler version of modal editing to Obsidian – notes default to preview mode, and you explicitly enter edit mode when needed.
 
-This project uses Typescript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in Typescript Definition format, which contains TSDoc comments describing what it does.
+## 🎯 Problem Solved
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+When using Obsidian's default settings, it's easy to accidentally modify notes while reading them. This is particularly frustrating with:
+- Important documentation or reference materials
+- Notes you want to keep pristine
+- Shared knowledge bases where accidental changes affect timestamps
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Changes the default font color to red using `styles.css`.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## ✨ Key Features
 
-## First time developing plugins?
+- **🔒 Auto-Lock**: Notes automatically open in preview mode
+- **👆 Double-Click to Edit**: Simple double-click anywhere to unlock and start editing
+- **⌨️ Escape to Lock**: Press `ESC` while editing to return to preview mode
+- **🎨 Visual Indicators**: Color-coded lock/unlock button in the note header
+  - Red lock icon = Note is locked (preview mode)
+  - Green unlock icon = Note is unlocked (edit mode)
+- **🎯 Per-Note Control**: Each note's lock state is tracked individually
 
-Quick starting guide for new plugin devs:
+## 🚀 Installation
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+Locked Notes is not yet published in the Obsidian community plugins directory. You can only install it manually for now.
 
-## Releasing new releases
+### Development Installation (Recommended)
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/preslavrachev/obsidian-locked-notes.git
+   cd obsidian-locked-notes
+   ```
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-## Adding your plugin to the community plugin list
+3. **Build the plugin**
+   ```bash
+   # For development (watch mode)
+   npm run dev
 
-- Check https://github.com/obsidianmd/obsidian-releases/blob/master/plugin-review.md
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+   # For production build
+   npm run build
+   ```
 
-## How to use
+4. **Manual installation**
+   - Create the plugin directory in your vault: `VaultFolder/.obsidian/plugins/obsidian-locked-notes/`
+   - Copy these files to the plugin directory:
+     - `main.js`
+     - `manifest.json`
 
-- Clone this repo.
-- `npm i` or `yarn` to install dependencies
-- `npm run dev` to start compilation in watch mode.
+5. **Enable the plugin**
+   - Open Obsidian
+   - Go to Settings → Community plugins
+   - Find "Locked Notes" and enable it
 
-## Manually installing the plugin
+## 🧠 Philosophy
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+This plugin embodies the principle of **intentional editing** – creating a clear distinction between consuming and creating information. It's inspired by modal editors like Vim but designed to be approachable for all users.
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+## ⚠️ Known Limitations
 
-## Funding URL
+- Lock state doesn't persist between Obsidian sessions
+- Only works with Markdown notes (by design)
+- Replaces Obsidian's default mode switcher button
 
-You can include funding URLs where people who use your plugin can financially support it.
+## 📝 License
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+MIT License - feel free to modify and distribute as needed.
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
+## ☕ Support
 
-If you have multiple URLs, you can also do:
+If you find this plugin useful, consider [buying me a coffee](https://p5v.gumroad.com/coffee)!
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+---
 
-## API Documentation
-
-See https://github.com/obsidianmd/obsidian-api
+**Author**: [Preslav Rachev](https://preslav.me)
+**Version**: 0.1.0
+**Min Obsidian Version**: 0.15.0
