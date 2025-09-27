@@ -66,6 +66,22 @@ Locked Notes is not yet published in the Obsidian community plugins directory. Y
 
 This plugin embodies the principle of **intentional editing** – creating a clear distinction between consuming and creating information. It's inspired by modal editors like Vim but designed to be approachable for all users.
 
+## ❓ FAQ
+
+**Q: How is this different from Obsidian's default preview/edit modes or setting my vault to read-only?**
+
+A: This plugin is essentially a more intuitive interface layer on top of Obsidian's existing preview/edit functionality. While you can already use Ctrl+E or vault-wide read-only settings, this plugin offers:
+- **Faster transitions**: Double-click exactly where you want to edit (no keyboard shortcuts needed)
+- **Contextual editing**: Click-to-edit at the precise location rather than general mode switching
+- **VIM-inspired workflow**: Escape key for quick return to reading mode
+- **Per-note flexibility**: Individual note states rather than vault-wide settings
+
+Think of it as a more fluid, mouse-friendly alternative to keyboard shortcuts and global settings.
+
+**Q: Why not just use Ctrl+E?**
+
+A: You absolutely can! This plugin simply provides an alternative interaction pattern that some users find more natural - particularly the double-click-to-edit behavior that's common in many applications.
+
 ## ⚠️ Known Limitations
 
 - Lock state doesn't persist between Obsidian sessions
